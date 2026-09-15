@@ -1,14 +1,14 @@
-# Control iOS and Android devices with AI agents.
+# Agent-native app automation for mobile, TV, and desktop.
 
-> agent-device is a token-efficient, lightweight CLI for iOS and Android device automation. Gives your agents "eyes" to see and "hands" to interact with the UI.
+> agent-device gives coding agents structured UI access, deterministic interactions, and app-level evidence across mobile, TV, and desktop targets. Use it to verify generated code, debug broken flows, profile runtime behavior, and turn exploratory QA into replayable checks.
 
-[Get Started](/docs/introduction) | [Commands](/docs/commands)
+[Get Started](/docs/agent-setup) | [Commands](/docs/commands)
 
 ## Features
 
-- **One CLI, many devices**: Control iOS simulators, Android emulators, and physical devices with consistent snapshot and interaction commands.
-- **Token-efficient UI snapshots**: Accessibility trees give agents a complete view of the UI while keeping output compact.
-- **Interactions that just work**: Tap, swipe, scroll, focus, and type with precise coordinates or semantic finders.
-- **Session and replay**: Open apps, switch apps in-session, and replay recorded actions to reproduce flows across platforms.
-- **Visual verification**: Capture full-resolution screenshots and video recordings for reporting and visual checks.
-- **Traceable automation**: Collect trace logs for XCTest to debug flaky interactions.
+- **One CLI, many app surfaces**: Control iOS, Android, tvOS, Android TV, Amazon Vega OS TV apps in the Vega Virtual Device, macOS, and Linux desktop targets through one CLI.
+- **Accessibility-first snapshots**: On supported targets, accessibility trees give agents structured UI context without forcing screenshot-only reasoning.
+- **Agent-native interactions**: Tap, pan, fling, pinch, rotate, scroll, focus, type, assert, and find visible UI through refs, selectors, and semantic finders.
+- **Built-in debugging and profiling**: Use each target's supported backends to collect logs, inspect traffic, capture screens and recordings, and sample performance.
+- **Session and replay**: Open apps, keep stateful context, and replay recorded `.ad` actions to reproduce flows without AI at runtime.
+- **React Native internals**: Use agent-device react-devtools for component trees and render profiles, and agent-device cdp for React Native JS heap snapshots, diffs, and leak retainers.

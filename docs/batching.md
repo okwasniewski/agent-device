@@ -20,7 +20,7 @@ agent-device batch \
 Inline for small payloads:
 
 ```bash
-agent-device batch --steps '[{"command":"open","positionals":["settings"]},{"command":"wait","positionals":["100"]}]'
+agent-device batch --steps '[{"command":"open","input":{"app":"settings"}},{"command":"wait","input":{"kind":"duration","durationMs":100}}]'
 ```
 
 ## Step payload format
@@ -29,17 +29,27 @@ agent-device batch --steps '[{"command":"open","positionals":["settings"]},{"com
 
 ```json
 [
-  { "command": "open", "positionals": ["settings"], "flags": {} },
-  { "command": "wait", "positionals": ["label=\"Privacy & Security\"", "3000"], "flags": {} },
-  { "command": "click", "positionals": ["label=\"Privacy & Security\""], "flags": {} },
-  { "command": "get", "positionals": ["text", "label=\"Tracking\""], "flags": {} }
+  { "command": "open", "input": { "app": "settings" } },
+  {
+    "command": "wait",
+    "input": { "kind": "selector", "selector": "label=\"Privacy & Security\"", "timeoutMs": 3000 }
+  },
+  {
+    "command": "click",
+    "input": { "target": { "kind": "selector", "selector": "label=\"Privacy & Security\"" } }
+  },
+  {
+    "command": "get",
+    "input": { "format": "text", "target": { "kind": "selector", "selector": "label=\"Tracking\"" } }
+  }
 ]
 ```
 
 Notes:
 
-- `positionals` is optional (defaults to `[]`).
-- `flags` is optional (defaults to `{}`).
+- `input` is required and uses the same fields as the matching MCP/Node command.
+- Unknown top-level step fields are rejected. Supported keys are `command`, `input`, and `runtime`.
+- The legacy `positionals`/`flags` step shape was removed in 0.21. Migrate each step to structured input, for example `{"command":"open","input":{"app":"settings","platform":"ios"}}`.
 - nested `batch` and `replay` steps are rejected.
 - `--on-error stop` is the supported behavior.
 
@@ -64,6 +74,8 @@ Success:
 }
 ```
 
+In non-JSON mode, `batch` also prints a short per-step summary after the overall completion line.
+
 Failure:
 
 ```json
@@ -75,7 +87,6 @@ Failure:
     "details": {
       "step": 3,
       "command": "click",
-      "positionals": ["label=\"Privacy & Security\""],
       "executed": 2,
       "total": 4,
       "partialResults": [
@@ -95,6 +106,45 @@ Failure:
 - Prefer `--steps-file` over inline JSON.
 - Keep batches moderate (about 5-20 steps).
 - Replan from the failing step using `details.step` and `details.partialResults`.
+
+## Canonical recipes
+
+Open app -> open thread -> type -> send
+
+```json
+[
+  { "command": "open", "input": { "app": "com.example.chat", "platform": "android" } },
+  { "command": "wait", "input": { "kind": "text", "text": "Inbox", "timeoutMs": 3000 } },
+  { "command": "press", "input": { "target": { "kind": "selector", "selector": "label=\"Inbox\" role=button" } } },
+  { "command": "press", "input": { "target": { "kind": "selector", "selector": "label=\"Morgan Lee\"" } } },
+  {
+    "command": "fill",
+    "input": {
+      "target": { "kind": "selector", "selector": "label=\"Message\" role=text-field" },
+      "text": "sent the update"
+    }
+  },
+  { "command": "press", "input": { "target": { "kind": "selector", "selector": "label=\"Send\" role=button" } } },
+  { "command": "wait", "input": { "kind": "text", "text": "sent the update", "timeoutMs": 3000 } }
+]
+```
+
+Open app -> open action menu -> choose option -> verify
+
+```json
+[
+  { "command": "open", "input": { "app": "com.example.app", "platform": "android" } },
+  { "command": "wait", "input": { "kind": "text", "text": "Home", "timeoutMs": 3000 } },
+  {
+    "command": "press",
+    "input": { "target": { "kind": "selector", "selector": "label=\"More actions\" role=button" } }
+  },
+  { "command": "wait", "input": { "kind": "text", "text": "Scan document", "timeoutMs": 2000 } },
+  { "command": "press", "input": { "target": { "kind": "selector", "selector": "label=\"Scan document\"" } } },
+  { "command": "wait", "input": { "kind": "text", "text": "Document uploaded", "timeoutMs": 15000 } },
+  { "command": "is", "input": { "predicate": "visible", "selector": "label=\"Document uploaded\"" } }
+]
+```
 
 ## Stale accessibility tree risk
 

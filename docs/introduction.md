@@ -1,61 +1,68 @@
 # Introduction
 
-`agent-device` is a CLI for automating iOS simulators + physical devices and Android emulators + devices from agents. It provides:
+`agent-device` is an agent-native CLI for app verification and QA from coding agents. Across iOS, Android, HarmonyOS, tvOS, Android TV, Amazon Vega OS TV apps in the Vega Virtual Device, macOS, Linux desktop targets, and a minimal managed web browser surface, it provides the interactions and target-dependent structured UI, evidence, performance, and replay capabilities each backend supports.
 
-- Accessibility snapshots for UI understanding
-- Deterministic interactions (tap, type, scroll)
-- Session-aware workflows and replay
+Use it when an agent needs to inspect and operate a real app, not just reason about source code or screenshots.
 
-If you know `agent-browser`, this is the mobile-native counterpart for iOS/Android UI automation.
+`agent-device` is the agent's hands, eyes, and evidence collector. It does not contain the test intelligence itself: the coding agent, QA agent, or project harness reads the task, interprets the current screen, chooses commands, and judges whether the result meets the scenario. Keeping that boundary clear makes it easier to combine live exploration, deterministic replay, and human review without hiding decision-making inside the device tool.
 
-## What it’s good at
+## Where it shines
 
-- Capturing structured UI state for LLMs
-- Driving common UI actions with refs or semantic selectors
-- Replaying flows for regression checks
+- **App verification for agents**: run the app, inspect visible UI, act through refs/selectors, and verify expected state.
+- **Token-efficient UI context**: accessibility snapshots give agents structured UI state instead of screenshot-only reasoning.
+- **Runtime evidence**: capture screenshots, recordings, logs, network traffic, audio-level probes for browser and host-rendered simulator/emulator audio, traces, CPU/memory/perf snapshots, and crash-related logs when the happy path breaks.
+- **Replayable checks**: turn stable exploratory sessions into `.ad` replay scripts that can run again without AI.
+- **React Native and Expo workflows**: pair device automation with optional React DevTools profiling for component trees, props/state/hooks, slow renders, and rerenders.
+- **Local devices and app surfaces**: drive simulators, emulators, physical devices, TV targets, desktop apps, and browser sessions through one CLI.
 
-## Platform support highlights
+If you know `agent-browser`, `agent-device` brings the same agent-oriented workflow to mobile, TV, desktop, and a narrow managed web browser slice.
 
-- iOS core runner commands: `snapshot`, `diff snapshot`, `wait`, `click`, `fill`, `get`, `is`, `find`, `press`, `long-press`, `focus`, `type`, `scroll`, `scrollintoview`, `back`, `home`, `app-switcher`, `open` (app), `close`, `screenshot`, `apps`, `appstate`.
-- iOS `appstate` is session-scoped on the selected target device.
-- iOS simulator-only: `alert`, `pinch`, `reinstall`, `settings`.
-- iOS `record` supports simulators and physical devices.
-  - Simulators use native `simctl io ... recordVideo`.
-  - Physical devices use runner screenshot capture (`XCUIScreen.main.screenshot()` frames) stitched into MP4, so FPS is best-effort (not guaranteed 60 even with `--fps 60`).
-  - Physical-device recording requires an active app session context (`open <app>` first).
-  - Physical-device recording defaults to uncapped (max available) FPS and supports `--fps` caps.
-- Android support remains unchanged.
+## Development loop
 
-## Architecture (high level)
+`agent-device` closes the agentic development loop: agents can write code, run the real app, verify the UI end-to-end, collect screenshots/videos/logs/perf evidence, and feed bugs, crashes, or performance findings back into the next fix iteration before a human reviews the PR.
 
-1. CLI sends requests to the daemon.
-2. The daemon manages sessions and dispatches to platform drivers.
-3. iOS uses XCTest runner for snapshots and input on simulators and physical devices.
-4. Android uses ADB-based tooling.
+![Sketch showing agent-device as the live app verification layer in the agentic development loop](/agentic-development-loop.svg)
 
-## Example
+## How agents use it
+
+The normal loop is:
 
 ```bash
-# Navigate and get snapshot
-agent-device open Settings --platform ios
+agent-device apps --platform ios
+agent-device open <app-or-url> --platform ios
 agent-device snapshot -i
-# Output
-# Page: Contacts
-# App: com.apple.MobileAddressBook
-# Snapshot: 44 nodes
-# @e1 [application] "Contacts"
-#  @e2 [window]
-#    @e3 [other]
-#  @e4 [other] "Lists"
-#    @e5 [navigation-bar] "Lists"
-#      @e6 [button] "Lists"
-#      @e7 [text] "Contacts"
-#    @e8 [other] "John Doe"
-
-# Click and fill
-agent-device click @e8
-agent-device snapshot -i
-agent-device diff snapshot
-agent-device fill @e5 "Doe 2"
+agent-device press @e12
+agent-device diff snapshot -i
 agent-device close
 ```
+
+Snapshots are accessibility-first: labels, roles, values, and test IDs are the primary signal for choosing refs and selectors. Screenshots and videos are still important evidence, and they are useful fallbacks when a screen exposes poor accessibility data, but durable agent workflows should prefer structured refs/selectors over pixel or OCR guesses.
+
+Installed CLI help is the version-matched operating guide. Start there before planning device work:
+
+```bash
+agent-device help workflow
+agent-device help debugging
+agent-device help react-devtools
+agent-device help cdp
+agent-device help dogfood
+```
+
+Use [AI Agent Setup](/agent-device/docs/agent-setup.md) for Cursor, Codex, Claude Code, Windsurf, Cline, Goose, skills, and MCP setup. Use [Commands](/agent-device/docs/commands.md) for detailed command groups and platform behavior.
+
+## Where it fits
+
+`agent-device` is for agents, but humans still install it, grant permissions, review artifacts, and decide what ships.
+
+It complements scripted test frameworks such as Appium, Maestro, Detox, XCTest, and Espresso. Keep those for stable human-authored coverage. Use `agent-device` when an agent needs to explore, reproduce, debug, profile, collect evidence, or record a replay from live app behavior.
+
+MCP support exposes direct structured tools for installed `agent-device` commands. Tools use structured input contracts through `AgentDeviceClient`, so MCP clients can call device workflows directly while the daemon remains the execution source of truth.
+
+## Next steps
+
+- Install the CLI: [Installation](/agent-device/docs/installation.md)
+- Set up an agent client: [AI Agent Setup](/agent-device/docs/agent-setup.md)
+- Run the first commands: [Quick Start](/agent-device/docs/quick-start.md)
+- Inspect all command groups: [Commands](/agent-device/docs/commands.md)
+- Collect runtime evidence: [Debugging & Profiling](/agent-device/docs/debugging-profiling.md)
+- Record deterministic flows: [Replay & E2E](/agent-device/docs/replay-e2e.md)
