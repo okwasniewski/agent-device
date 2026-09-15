@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixed (limrun): `press --double-tap` on Limrun iOS direct sessions sends both taps in one
+  `performActions` batch with an 80 ms on-device pause. The interactor issued two independent `tap`
+  requests, so a network round trip sat between the taps and iOS recognized them as two slow
+  single taps.
 - Changed (android): the snapshot helper release manifest no longer carries `installArgs`, and the
   helper installs with a fixed `adb install -r` like the IME helper. The array only ever spelled
   `install -r` plus the `-t` that #2603 retired with the `testOnly` flag, so the manifest → flag →
