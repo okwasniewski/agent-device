@@ -48,3 +48,19 @@ Recorded 2026-09-16 on Limrun iOS instance `ios_euna_01m2mr0avjeebt7v4tbbwf950p`
 
 `limrun-record.mp4` is the file `record stop` wrote (no sidecar this time); `limrun-record.gif` is a
 down-scaled preview of it, `limrun-record-frame.jpg` a frame at 6 s. Timeline: `timeline.txt`.
+
+## recording-v2/ (PR #2646 after review: memoized stop + separate download)
+
+Recorded 2026-09-16 with `agent-device` built from `feat/limrun-recording` at `cad4ee26a` (same
+tree as the pushed head), on main `6dd57d9ae`. `record stop` now stops the instance recorder once and
+downloads the served MP4 in a separate bounded step. Every file here was written by `record stop`.
+
+| platform | instance | command | result |
+| --- | --- | --- | --- |
+| iOS | `ios_euna_01m2mw3hyafw9a13tzyg0y05yr` | `record start limrun-ios-record.mp4` … longpress + press canary … `record stop` | `recorder: confirmed`, `durationMs: 10099`; h264 602x1310, 9.6 s |
+| iOS | same | `record start limrun-ios-record-high.mp4 --quality high` … scroll up/down … `record stop` | `recorder: confirmed`, `durationMs: 10871`; h264 964x2096, 10.2 s |
+| Android | `android_euna_01m2mw90x4fc98bkegjxg91bq9` | `record start limrun-android-record.mp4 --quality high` … `press text="Catalog"`, `scroll down 400`, `press text="Home"` … `record stop` | `recorder: confirmed`, `durationMs: 10488`; h264 576x1288, 9.4 s |
+
+The Android session's first `snapshot -i --json` reported `androidSnapshot.backend: android-helper`,
+`helperVersion: 0.21.4` (the bundled helper, built with `pnpm build:android`), so the gestures in the
+clip went through the production touch path. Timelines: `timeline-ios.txt`, `timeline-android.txt`.

@@ -1,0 +1,11 @@
+10:27:22 iOS connect
+10:27:26 install
+10:27:43 RECORD START (medium)
+10:27:46 baseline: @e23 [text] "Last input: none" @e24 [text] "Long presses: 0" 
+10:27:50 after longpress: @e23 [text] "Last input: longpress" @e24 [text] "Long presses: 1" 
+10:27:53 after press: @e23 [text] "Last input: tap" @e24 [text] "Long presses: 1" 
+10:27:53 RECORD STOP
+10:27:54 RECORD START (high)
+10:28:04 RECORD STOP (high)
+10:28:05 close
+10:28:06 iOS done

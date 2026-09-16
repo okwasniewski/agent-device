@@ -1,0 +1,8 @@
+10:30:22 Android connect
+10:30:22 snapshot (allocate) + helper proof
+10:30:25 install apk
+10:30:34 RECORD START --quality high
+10:30:35 gestures during recording
+10:30:44 RECORD STOP
+10:30:45 close
+10:30:46 Android done
