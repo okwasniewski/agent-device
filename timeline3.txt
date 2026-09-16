@@ -1,0 +1,15 @@
+07:58:36 connect
+07:58:39 instance=ios_euna_01m2mkk4kmec8ba79fz359axnp
+07:58:51 REC start double-tap.mp4: 2026-09-16T07:58:50.463Z
+07:58:51 fields before fill:
+07:58:52 fill @e8
+07:58:57 fields after fill:
+07:58:59 menu after fill: 
+07:58:59 control SINGLE press @e8
+07:59:01 menu after single press: @e20 [text] "Select" @e21 [text] "Select All" @e22 [text] "AutoFill" 
+07:59:02 DOUBLE-TAP begin @e8
+07:59:03 DOUBLE-TAP end
+07:59:04 menu after double tap: @e20 [text] "Cut" @e21 [text] "Copy" @e23 [text] "AutoFill" 
+07:59:07 REC stop double-tap.mp4: dur=16.855000
+07:59:07 close
+07:59:07 done

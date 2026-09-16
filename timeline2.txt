@@ -1,0 +1,23 @@
+07:57:08 connect
+07:57:09 runId=cli-mu3t565g
+07:57:11 instance=ios_euna_01m2mkgemffvyty5wvbagsxsg0
+07:57:22 REC start long-press.mp4: 2026-09-16T07:57:21.795Z
+07:57:32 baseline: @e23 [text] "Last input: none" @e24 [text] "Long presses: 0" 
+07:57:32 LONGPRESS begin
+07:57:34 LONGPRESS end
+07:57:36 after longpress: @e23 [text] "Last input: longpress" @e24 [text] "Long presses: 1" 
+07:57:36 control PRESS
+07:57:38 after press: @e23 [text] "Last input: tap" @e24 [text] "Long presses: 1" 
+07:57:41 REC stop long-press.mp4: 2026-09-16T07:57:40.921Z dur=18.780000
+07:57:43 REC start double-tap.mp4: 2026-09-16T07:57:42.959Z
+07:57:43 deep link form
+07:57:45 fill @e8
+07:57:50 menu after fill: 
+07:57:51 control SINGLE press 
+07:57:53 menu after single press: 
+07:57:53 DOUBLE-TAP begin 
+07:57:54 DOUBLE-TAP end
+07:57:55 menu after double tap: 
+07:57:57 REC stop double-tap.mp4: 2026-09-16T07:57:57.673Z dur=14.346667
+07:57:57 close session
+07:57:58 done
