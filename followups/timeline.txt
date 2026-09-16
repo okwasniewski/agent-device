@@ -1,0 +1,12 @@
+09:15:43 connect
+09:15:46 install
+09:16:08 SCREENSHOT via agent-device
+09:16:09 record start --fps 30 (expected refusal)
+09:16:09 RECORD START
+09:16:12 baseline: 
+09:16:12 longpress during recording
+09:16:16 after longpress: 
+09:16:19 after press: 
+09:16:20 RECORD STOP
+09:16:21 close
+09:16:22 done
