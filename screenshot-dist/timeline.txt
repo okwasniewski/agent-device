@@ -1,0 +1,6 @@
+10:49:03 connect
+10:49:06 install + open
+10:49:15 SCREENSHOT on dist build
+10:49:16 second screenshot (warm worker)
+10:49:16 close
+10:49:16 done

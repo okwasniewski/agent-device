@@ -64,3 +64,13 @@ downloads the served MP4 in a separate bounded step. Every file here was written
 The Android session's first `snapshot -i --json` reported `androidSnapshot.backend: android-helper`,
 `helperVersion: 0.21.4` (the bundled helper, built with `pnpm build:android`), so the gestures in the
 clip went through the production touch path. Timelines: `timeline-ios.txt`, `timeline-android.txt`.
+
+## screenshot-dist/ (PR #2645 after review: dist build, worker path)
+
+Recorded 2026-09-16 on Limrun iOS instance `ios_euna_01m2mxb7bef0q9hz5qvfga80jg` with the tsdown
+dist build of `fix/limrun-ios-screenshot-png` at `dfa114c7c`/`f557f1153`, so the lazily loaded
+`png-transcode.js` chunk and the `png-worker.js` bundle carrying jpeg-js are what ran. Two
+`screenshot <path>.png` calls (cold and warm worker) both returned `success: true`, `width: 402`,
+`height: 874`; `file` reads both as `PNG image data, 402 x 874, 8-bit/color RGBA`. The session's daemon
+log carried no `png_worker_unavailable` diagnostic, so the transcode ran on the worker, not the
+in-process fallback. Timeline: `timeline.txt`.
