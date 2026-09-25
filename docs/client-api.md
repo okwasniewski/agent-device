@@ -30,6 +30,12 @@ Supported public entry points for Node consumers:
   - `createLocalArtifactAdapter(options?)`
   - `AppError`, `isAgentDeviceError(error)`, `normalizeAgentDeviceError(error)`
   - `centerOfRect(rect)`
+  - types: `AgentDeviceClient`, `AgentDeviceClientConfig`, `AgentDeviceDevice`
+  - types: every option and result type of the client's methods, among them `AppOpenOptions`,
+    `AppOpenResult`, `CaptureSnapshotOptions`, `CaptureSnapshotResult`, `CaptureScreenshotResult`,
+    `PressOptions`
+  - types: `SnapshotNode`, `RawSnapshotNode`, `SnapshotState`, `Rect`, `Point`
+  - types: `NormalizedError`, `AppErrorCode`, `KnownAppErrorCode`, `AppErrorDetails`, `ErrorCause`
 - `agent-device/io`
   - `createLocalArtifactAdapter(options?)`
   - types: `ArtifactAdapter`, `ArtifactDescriptor`, `CreateTempFileOptions`, `FileInputRef`,
@@ -116,8 +122,11 @@ import {
   isAgentDeviceError,
   normalizeAgentDeviceError,
 } from 'agent-device';
+import type { AgentDeviceClient, AgentDeviceDevice } from 'agent-device';
 
-async function resolveSnapshotCapableIosDevice(client: ReturnType<typeof createAgentDeviceClient>) {
+async function resolveSnapshotCapableIosDevice(
+  client: AgentDeviceClient,
+): Promise<AgentDeviceDevice> {
   const devices = await client.devices.list({ platform: 'ios' });
   const device = devices[0];
   if (!device) {
@@ -178,9 +187,6 @@ await main();
 
 For direct iOS simulator app launches, `client.apps.open({ app, platform: 'ios', launchConsole: './artifacts/app.console.log' })` captures launch-time
 stdout/stderr. The option mirrors `open --launch-console` and is not valid for URL opens or non-simulator targets.
-
-When surfacing Apple simulators, `client.apps.open({ deviceHub: true })` mirrors `open --device-hub` and uses Xcode Device Hub instead of the
-standalone Simulator app.
 
 `client.sessions.stateDir()` mirrors `session state-dir` and returns the resolved daemon state directory as a pure local resolution — it never starts
 or contacts the daemon. Pass `{ stateDir }` to resolve an explicit override the same way the CLI resolves `--state-dir`.
@@ -273,12 +279,23 @@ advertise reverse support automatically; call `createAndroidPortReverseManager(p
 only when the provider supports `adb reverse` argument semantics. The manager makes duplicate setup
 idempotent for the same owner and rejects conflicting owners for the same local endpoint.
 
+The device shell re-parses whatever follows `shell` or `exec-out`, so those commands are built for you:
+every dynamic word is rendered for the quoting its transport applies before it reaches the device. `adb`
+forwards words verbatim, so a word is single-quoted; `hdc` wraps each element it sends in double quotes,
+where `$`, a backquote, and `"` stay live, so a word is escaped for that context instead. An array that
+begins with `shell` or `exec-out` and did not come from those builders is refused with `INVALID_ARGS` and
+`details.reason: 'unguarded-device-shell-argv'` instead of being dispatched. A bridge that composes its
+own device commands calls `runAdbShell(executor, words, options?)` or
+`runAdbExecOut(executor, words, options?)` from `agent-device/android-adb`, passing each value as its
+own word; `runAndroidShell(device, words, options?)` and `runAndroidExecOut(device, words, options?)`
+resolve the executor from a device instead.
+
 ```ts
 import { getAndroidAppStateWithAdb, listAndroidAppsWithAdb } from 'agent-device/android-adb';
 import type { AndroidAdbExecutorOptions } from 'agent-device/android-adb';
 
 const provider = {
-  exec: async (args: string[], options?: AndroidAdbExecutorOptions) =>
+  exec: async (args: readonly string[], options?: AndroidAdbExecutorOptions) =>
     await runAdbThroughRemoteTunnel(args, options),
 };
 
@@ -332,7 +349,19 @@ await client.command.tvRemote({
 });
 
 await client.command.appSwitcher();
+await client.command.actionButton();
+await client.command.fold({ pose: 'open' });
+await client.command.fold({
+  keyframes: [
+    { atMs: 0, angle: 0 },
+    { atMs: 1667, angle: 160 },
+    { atMs: 3333, angle: 100 },
+    { atMs: 5000, angle: 180 },
+  ],
+});
 ```
+
+`fold` accepts either `pose` or `keyframes`. Keyframes use linear interpolation at roughly 60 updates per second; repeat an angle to hold it. Timestamps must start at zero and increase strictly, with 2–64 frames and a final timestamp no greater than 60,000ms. Angles must be finite and between 0° and 180°. The final timestamp bounds motion, excluding helper preparation and final hinge verification. A custom final angle is verified within 0.5°; interior angles must also settle. Cancellation stops the motion at its current angle. Re-snapshot afterwards, including after interrupted motion.
 
 Vega OS client support is currently VVD-only and covers device discovery, app open/close, `back`, `home`, and `tvRemote`. Physical Fire TV, capture, selector, install, logging, and performance methods report unsupported for Vega targets.
 
@@ -345,6 +374,8 @@ Supported command methods:
 - `home`
 - `orientation`
 - `appSwitcher`
+- `actionButton`
+- `fold`
 - `keyboard`
 - `clipboard`
 - `tvRemote`
